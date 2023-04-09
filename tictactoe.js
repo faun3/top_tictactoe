@@ -1,5 +1,6 @@
 let Gameboard = {
-  boardArr: ["x", "x", "o", "x", "o", "", "", "", ""],
+  boardArr: ["", "", "", "", "", "", "", "", ""],
+
   clearBoard: () => {
     const squares = document.querySelectorAll(".boardWrapper div");
     const boardWrapper = document.querySelector(".boardWrapper");
@@ -7,11 +8,13 @@ let Gameboard = {
       boardWrapper.removeChild(squares[i]);
     }
   },
+
   renderBoard: () => {
     let boardWrapper = document.querySelector(".boardWrapper");
     for (let i = 0; i < 9; i++) {
       let squareDiv = document.createElement("div");
       squareDiv.classList.add("square");
+      squareDiv.dataset.index = i;
       squareDiv.textContent = Gameboard.boardArr[i];
       boardWrapper.appendChild(squareDiv);
     }
@@ -21,17 +24,16 @@ let Gameboard = {
 const PlayerFactory = (name, symbol) => {
   const makeMove = () => {
     let boardSquares = document.querySelectorAll(".square");
-    for (let i = 0; i < 9; i++) {
-      boardSquares[i].addEventListener("click", () => {
-        if (Gameboard.boardArr[i] === "") {
-          boardSquares[i].textContent = symbol;
-          Gameboard.boardArr[i] = symbol;
+    boardSquares.forEach((square) => {
+      square.addEventListener("click", () => {
+        if (Gameboard.boardArr[square.dataset.index] === "") {
+          square.textContent = symbol;
+          Gameboard.boardArr[square.dataset.index] = symbol;
+          Gameboard.clearBoard();
+          Gameboard.renderBoard();
         }
-        Gameboard.clearBoard();
-        Gameboard.renderBoard();
-        console.table(Gameboard.boardArr);
       });
-    }
+    });
   };
   return { name, symbol, makeMove };
 };
@@ -41,50 +43,65 @@ const Game = (() => {
   let triple = false;
   let tied = false;
   let winner = "";
+  let round = 0;
   const checkRow = () => {
     for (let i = 0; i < 7; i += 2) {
-      if (
-        boardArr[i] === boardArr[i + 1] &&
-        boardArr[i + 1] === boardArr[i + 2]
-      ) {
-        if (boardArr[0] === "x") {
-          winner = player1.name;
-        } else winner = player2.name;
-        triple = true;
+      if (Gameboard.boardArr[i] !== "") {
+        if (
+          Gameboard.boardArr[i] === Gameboard.boardArr[i + 1] &&
+          Gameboard.boardArr[i + 1] === Gameboard.boardArr[i + 2]
+        ) {
+          if (Gameboard.boardArr[0] === "x") {
+            winner = player1.name;
+          } else winner = player2.name;
+          triple = true;
+        }
       }
     }
   };
   const checkCol = () => {
     for (let i = 0; i < 3; i++) {
+      if (Gameboard.boardArr[i] !== "") {
+        if (
+          Gameboard.boardArr[i] === Gameboard.boardArr[i + 3] &&
+          Gameboard.boardArr[i + 3] === Gameboard.boardArr[i + 6]
+        ) {
+          if (Gameboard.boardArr[0] === "x") {
+            winner = player1.name;
+          } else winner = player2.name;
+          triple = true;
+        }
+      }
+    }
+  };
+  const checkDiag = () => {
+    if (Gameboard.boardArr[0] !== "") {
       if (
-        boardArr[i] === boardArr[i + 3] &&
-        boardArr[i + 3] === boardArr[i + 6]
+        Gameboard.boardArr[0] === Gameboard.boardArr[4] &&
+        Gameboard.boardArr[4] === Gameboard.boardArr[8]
       ) {
-        if (boardArr[0] === "x") {
+        if (Gameboard.boardArr[0] === "x") {
+          winner = player1.name;
+        } else winner = player2.name;
+        triple = true;
+      }
+    }
+    if (Gameboard.boardArr[2] !== "") {
+      if (
+        Gameboard.boardArr[2] === Gameboard.boardArr[4] &&
+        Gameboard.boardArr[4] === Gameboard.boardArr[6]
+      ) {
+        if (Gameboard.boardArr[2] === "x") {
           winner = player1.name;
         } else winner = player2.name;
         triple = true;
       }
     }
   };
-  const checkDiag = () => {
-    if (boardArr[0] === boardArr[4] && boardArr[4] === boardArr[8]) {
-      if (boardArr[0] === "x") {
-        winner = player1.name;
-      } else winner = player2.name;
-      triple = true;
-    }
-    if (boardArr[2] === boardArr[4] && boardArr[4] === boardArr[6]) {
-      if (boardArr[2] === "x") {
-        winner = player1.name;
-      } else winner = player2.name;
-      triple = true;
-    }
-  };
   const checkTie = () => {
     let filled = 0;
     for (let i = 0; i < 9; i++) {
-      if (boardArr[i] !== "") {
+      if (Gameboard.boardArr[i] !== "") {
         filled++;
       }
     }
@@ -100,6 +117,7 @@ const Game = (() => {
     triple = false;
     tied = false;
     winner = "";
+    round = 0;
   };
   const doChecks = () => {
     checkCol();
@@ -118,11 +136,16 @@ const Game = (() => {
   const play = () => {
     console.log("playing");
     Gameboard.renderBoard();
-    while (!this.stop) {
-      player1.makeMove();
-      doChecks();
-      player2.makeMove();
-      doChecks();
+    while (round < 10) {
+      if (round % 2 == 0) {
+        player1.makeMove();
+        doChecks();
+        round++;
+      } else {
+        player2.makeMove();
+        doChecks();
+        round++;
+      }
     }
   };
   return { play };
