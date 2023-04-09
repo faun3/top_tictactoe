@@ -23,8 +23,10 @@ const PlayerFactory = (name, symbol) => {
     let boardSquares = document.querySelectorAll(".square");
     for (let i = 0; i < 9; i++) {
       boardSquares[i].addEventListener("click", () => {
-        boardSquares[i].textContent = symbol;
-        Gameboard.boardArr[i] = symbol;
+        if (Gameboard.boardArr[i] === "") {
+          boardSquares[i].textContent = symbol;
+          Gameboard.boardArr[i] = symbol;
+        }
         Gameboard.clearBoard();
         Gameboard.renderBoard();
         console.table(Gameboard.boardArr);
