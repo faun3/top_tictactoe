@@ -1,18 +1,19 @@
 let Gameboard = {
   boardArr: ["x", "x", "o", "", "o", "", "x", "", "o"],
+  renderBoard: () => {
+    let boardWrapper = document.querySelector(".boardWrapper");
+    for (let i = 0; i < 9; i++) {
+      let squareDiv = document.createElement("div");
+      let divP = document.createElement("p");
+      divP.textContent = Gameboard.boardArr[i];
+      squareDiv.appendChild(divP);
+      boardWrapper.appendChild(squareDiv);
+    }
+  },
 };
 
 const PlayerFactory = (name) => {
   return { name };
 };
 
-const renderBoard = function (boardArr) {
-  let boardWrapper = document.querySelector(".boardWrapper");
-  for (let i = 0; i < boardArr.length; i++) {
-    let squareDiv = document.createElement("div");
-    squareDiv.textContent = boardArr[i];
-    boardWrapper.appendChild(squareDiv);
-  }
-};
-
-renderBoard();
+Gameboard.renderBoard();
