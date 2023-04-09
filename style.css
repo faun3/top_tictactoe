@@ -1,5 +1,20 @@
-p {
-  color: blue;
+.boardWrapper {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  border: 2px black solid;
+}
+
+.boardWrapper div {
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  border: 2px black solid;
+}
+
+.boardWrapper div p {
+  font-size: 4rem;
   font-family: "Courier New", Courier, monospace;
-  font-weight: bold;
+  color: black;
 }
