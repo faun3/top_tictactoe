@@ -1,9 +1,10 @@
 let Gameboard = {
   boardArr: ["x", "x", "o", "x", "o", "", "", "", ""],
   clearBoard: () => {
-    let boardWrapper = document.querySelector(".boardWrapper");
+    const squares = document.querySelectorAll(".boardWrapper div");
+    const boardWrapper = document.querySelector(".boardWrapper");
     for (let i = 0; i < 9; i++) {
-      boardWrapper.removeChild("div");
+      boardWrapper.removeChild(squares[i]);
     }
   },
   renderBoard: () => {
@@ -20,12 +21,15 @@ let Gameboard = {
 const PlayerFactory = (name, symbol) => {
   const makeMove = () => {
     let boardSquares = document.querySelectorAll(".square");
-    boardSquares.forEach((square) => {
-      square.addEventListener("click", () => {
-        square.textContent = symbol;
-        //Gameboard.renderBoard();
+    for (let i = 0; i < 9; i++) {
+      boardSquares[i].addEventListener("click", () => {
+        boardSquares[i].textContent = symbol;
+        Gameboard.boardArr[i] = symbol;
+        Gameboard.clearBoard();
+        Gameboard.renderBoard();
+        console.table(Gameboard.boardArr);
       });
-    });
+    }
   };
   return { name, symbol, makeMove };
 };
