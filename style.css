@@ -1,20 +1,12 @@
-.boardWrapper {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr);
-  border: 2px black solid;
+* {
+  box-sizing: border-box;
 }
 
-.boardWrapper div {
-  aspect-ratio: 1 / 1;
+#app {
+  border: 1px solid black;
+  width: 500px;
+  height: 500px;
+  font-weight: bold;
   display: flex;
-  align-content: center;
-  justify-content: center;
-  border: 2px black solid;
-}
-
-.boardWrapper div p {
-  font-size: 4rem;
-  font-family: "Courier New", Courier, monospace;
-  color: black;
+  flex-direction: column;
 }

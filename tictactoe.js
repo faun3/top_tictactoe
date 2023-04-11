@@ -23,6 +23,7 @@ let Gameboard = {
 
 const PlayerFactory = (name, symbol) => {
   const makeMove = () => {
+    let moved = false;
     let boardSquares = document.querySelectorAll(".square");
     boardSquares.forEach((square) => {
       square.addEventListener("click", () => {
@@ -31,9 +32,11 @@ const PlayerFactory = (name, symbol) => {
           Gameboard.boardArr[square.dataset.index] = symbol;
           Gameboard.clearBoard();
           Gameboard.renderBoard();
+          moved = true;
         }
       });
     });
+    return moved;
   };
   return { name, symbol, makeMove };
 };
@@ -138,13 +141,18 @@ const Game = (() => {
     Gameboard.renderBoard();
     while (round < 10) {
       if (round % 2 == 0) {
-        player1.makeMove();
-        doChecks();
-        round++;
+        if (player1.makeMove) {
+          round++;
+        }
+        //player1.makeMove();
+        //doChecks();
+        //round++;
       } else {
-        player2.makeMove();
-        doChecks();
-        round++;
+        if (player2.makeMove()) {
+          round++;
+        }
+        //doChecks();
+        //round++;
       }
     }
   };
