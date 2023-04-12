@@ -7,6 +7,58 @@
   width: 500px;
   height: 500px;
   font-weight: bold;
+  font-family: sans-serif;
   display: flex;
   flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  background-color: #222;
+}
+
+.header > * {
+  color: #eeeeee;
+}
+
+.headerTurn {
+  padding: 12px;
+}
+
+.headerStatus {
+  padding: 12px;
+  flex-grow: 1;
+  text-align: center;
+}
+
+.headerRestart {
+  display: flex;
+  align-items: center;
+  justify-items: center;
+  border: none;
+  outline: none;
+  background: none;
+  cursor: pointer;
+}
+
+.board {
+  display: grid;
+  background-color: #cccccc;
+  gap: 10px;
+  padding: 10px;
+  flex-grow: 1;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+}
+
+.boardTile {
+  background: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 80px;
+  font-family: cursive;
+  color: #222222;
 }

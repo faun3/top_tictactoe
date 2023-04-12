@@ -61,10 +61,8 @@ class GameView {
     this.root.innerHTML = `
         <div class="header">
             <div class="headerTurn">
-                X's turn
             </div>
             <div class="headerStatus">
-                In Progress
             </div>
             <button type="button" class="headerRestart">
                 <span class="material-icons">
@@ -72,9 +70,77 @@ class GameView {
                 </span>
             </button>
         </div>
+        <div class="board">
+          <div class="boardTile" data-index="0"></div>
+          <div class="boardTile" data-index="1"></div>
+          <div class="boardTile" data-index="2"></div>
+          <div class="boardTile" data-index="3"></div>
+          <div class="boardTile" data-index="4"></div>
+          <div class="boardTile" data-index="5"></div>
+          <div class="boardTile" data-index="6"></div>
+          <div class="boardTile" data-index="7"></div>
+          <div class="boardTile" data-index="8"></div>
+        </div>
     `;
+
+    //this.onTileClick = undefined;
+    //this.onRestartClick = undefined;
+
+    this.root.querySelectorAll(".boardTile").forEach((tile) => {
+      tile.addEventListener("click", () => {
+        if (this.onTileClick) {
+          this.onTileClick(tile.dataset.index);
+        }
+      });
+    });
+
+    this.root.querySelector(".headerRestart").addEventListener("click", () => {
+      if (this.onRestartClick) {
+        this.onRestartClick();
+      }
+    });
+  }
+
+  onTileClick(i) {
+    game.makeMove(i);
+    gameView.update(game);
+  }
+
+  onRestartClick() {
+    game = new Game();
+    gameView.update(game);
+  }
+
+  update(game) {
+    this.updateTurn(game);
+    this.updateStatus(game);
+    this.updateBoard(game);
+  }
+
+  updateTurn(game) {
+    this.root.querySelector(".headerTurn").textContent = `${game.turn}'s turn`;
+  }
+
+  updateStatus(game) {
+    let status = "In Progress";
+    if (game.findWinningCombination()) {
+      status = `${game.turn} is the Winner!`;
+    } else if (!game.isInProgress()) {
+      status = "It's a tie!";
+    }
+
+    this.root.querySelector(".headerStatus").textContent = status;
+  }
+
+  updateBoard(game) {
+    for (let i = 0; i < game.board.length; i++) {
+      const tile = this.root.querySelector(`.boardTile[data-index="${i}"]`);
+      tile.textContent = game.board[i];
+    }
   }
 }
 
 let game = new Game();
 let gameView = new GameView(document.querySelector("#app"));
+
+gameView.update(game);
