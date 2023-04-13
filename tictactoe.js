@@ -1,165 +1,136 @@
-let Gameboard = {
-  boardArr: ["", "", "", "", "", "", "", "", ""],
+//the func inside the iife is just a factory function whose return value
+//is assigned to "game"
+const gameFactory = () => {
+  let turn = "x";
+  let board = new Array(9).fill("");
 
-  clearBoard: () => {
-    const squares = document.querySelectorAll(".boardWrapper div");
-    const boardWrapper = document.querySelector(".boardWrapper");
-    for (let i = 0; i < 9; i++) {
-      boardWrapper.removeChild(squares[i]);
-    }
-  },
+  const nextTurn = () => {
+    if (turn === "x") turn = "o";
+    else turn = "x";
+  };
 
-  renderBoard: () => {
-    let boardWrapper = document.querySelector(".boardWrapper");
-    for (let i = 0; i < 9; i++) {
-      let squareDiv = document.createElement("div");
-      squareDiv.classList.add("square");
-      squareDiv.dataset.index = i;
-      squareDiv.textContent = Gameboard.boardArr[i];
-      boardWrapper.appendChild(squareDiv);
+  const isInProgress = () => {
+    return !findWinningCombination() && board.includes("");
+  };
+
+  const findWinningCombination = () => {
+    const winningCombinations = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6],
+    ];
+
+    for (const combination of winningCombinations) {
+      const [a, b, c] = combination;
+
+      if (board[a] !== "" && board[a] === board[b] && board[a] === board[c]) {
+        return combination;
+      }
     }
-  },
+    return null;
+  };
+
+  const makeMove = (pos) => {
+    if (!isInProgress()) return;
+
+    if (board[pos] !== "") return;
+
+    board[pos] = turn;
+
+    if (!findWinningCombination()) {
+      nextTurn();
+    }
+  };
+  return { turn, board, makeMove, findWinningCombination, isInProgress };
 };
 
-const PlayerFactory = (name, symbol) => {
-  const makeMove = () => {
-    let moved = false;
-    let boardSquares = document.querySelectorAll(".square");
-    boardSquares.forEach((square) => {
-      square.addEventListener("click", () => {
-        if (Gameboard.boardArr[square.dataset.index] === "") {
-          square.textContent = symbol;
-          Gameboard.boardArr[square.dataset.index] = symbol;
-          Gameboard.clearBoard();
-          Gameboard.renderBoard();
-          moved = true;
-        }
-      });
+//passing root as an argument to the lambda expression is the same
+//as calling gameView's constructor with the "root" argument
+const gameView = ((root) => {
+  root.innerHTML = `
+        <div class="header">
+            <div class="headerTurn">
+            </div>
+            <div class="headerStatus">
+            </div>
+            <button type="button" class="headerRestart">
+                <span class="material-icons">
+                    refresh
+                </span>
+            </button>
+        </div>
+        <div class="board">
+          <div class="boardTile" data-index="0"></div>
+          <div class="boardTile" data-index="1"></div>
+          <div class="boardTile" data-index="2"></div>
+          <div class="boardTile" data-index="3"></div>
+          <div class="boardTile" data-index="4"></div>
+          <div class="boardTile" data-index="5"></div>
+          <div class="boardTile" data-index="6"></div>
+          <div class="boardTile" data-index="7"></div>
+          <div class="boardTile" data-index="8"></div>
+        </div>
+    `;
+
+  root.querySelectorAll(".boardTile").forEach((tile) => {
+    tile.addEventListener("click", () => {
+      if (onTileClick) {
+        onTileClick(tile.dataset.index);
+      }
     });
-    return moved;
-  };
-  return { name, symbol, makeMove };
-};
+  });
 
-const Game = (() => {
-  let end = false;
-  let triple = false;
-  let tied = false;
-  let winner = "";
-  let round = 0;
-  const checkRow = () => {
-    for (let i = 0; i < 7; i += 2) {
-      if (Gameboard.boardArr[i] !== "") {
-        if (
-          Gameboard.boardArr[i] === Gameboard.boardArr[i + 1] &&
-          Gameboard.boardArr[i + 1] === Gameboard.boardArr[i + 2]
-        ) {
-          if (Gameboard.boardArr[0] === "x") {
-            winner = player1.name;
-          } else winner = player2.name;
-          triple = true;
-        }
-      }
+  root.querySelector(".headerRestart").addEventListener("click", () => {
+    if (onRestartClick) {
+      onRestartClick();
     }
-  };
-  const checkCol = () => {
-    for (let i = 0; i < 3; i++) {
-      if (Gameboard.boardArr[i] !== "") {
-        if (
-          Gameboard.boardArr[i] === Gameboard.boardArr[i + 3] &&
-          Gameboard.boardArr[i + 3] === Gameboard.boardArr[i + 6]
-        ) {
-          if (Gameboard.boardArr[0] === "x") {
-            winner = player1.name;
-          } else winner = player2.name;
-          triple = true;
-        }
-      }
-    }
-  };
-  const checkDiag = () => {
-    if (Gameboard.boardArr[0] !== "") {
-      if (
-        Gameboard.boardArr[0] === Gameboard.boardArr[4] &&
-        Gameboard.boardArr[4] === Gameboard.boardArr[8]
-      ) {
-        if (Gameboard.boardArr[0] === "x") {
-          winner = player1.name;
-        } else winner = player2.name;
-        triple = true;
-      }
-    }
-    if (Gameboard.boardArr[2] !== "") {
-      if (
-        Gameboard.boardArr[2] === Gameboard.boardArr[4] &&
-        Gameboard.boardArr[4] === Gameboard.boardArr[6]
-      ) {
-        if (Gameboard.boardArr[2] === "x") {
-          winner = player1.name;
-        } else winner = player2.name;
-        triple = true;
-      }
-    }
-  };
-  const checkTie = () => {
-    let filled = 0;
-    for (let i = 0; i < 9; i++) {
-      if (Gameboard.boardArr[i] !== "") {
-        filled++;
-      }
-    }
-    if (filled === 9) {
-      tied = true;
-    }
-  };
-  const resetState = () => {
-    boardArr = ["", "", "", "", "", "", "", "", ""];
-    Gameboard.clearBoard();
-    Gameboard.renderBoard();
-    end = false;
-    triple = false;
-    tied = false;
-    winner = "";
-    round = 0;
-  };
-  const doChecks = () => {
-    checkCol();
-    checkDiag();
-    checkRow();
-    checkTie();
-    if (triple) {
-      end = true;
-      alert(`${winner} wins!`);
-      resetState();
-    }
-    if (tied) {
-      end = true;
-    }
-  };
-  const play = () => {
-    console.log("playing");
-    Gameboard.renderBoard();
-    while (round < 10) {
-      if (round % 2 == 0) {
-        if (player1.makeMove) {
-          round++;
-        }
-        //player1.makeMove();
-        //doChecks();
-        //round++;
-      } else {
-        if (player2.makeMove()) {
-          round++;
-        }
-        //doChecks();
-        //round++;
-      }
-    }
-  };
-  return { play };
-})();
+  });
 
-player1 = PlayerFactory("Gamer 1", "x");
-player2 = PlayerFactory("Gamer 2", "o");
+  const onTileClick = (i) => {
+    game.makeMove(i);
+    gameView.update(game);
+  };
 
-Game.play();
+  const onRestartClick = () => {
+    game = gameFactory();
+    gameView.update(game);
+  };
+
+  const updateTurn = (game) => {
+    root.querySelector(".headerTurn").textContent = `${game.turn}'s turn`;
+  };
+
+  updateStatus = (game) => {
+    let status = "In Progress";
+    if (game.findWinningCombination()) {
+      status = `${game.turn} is the Winner!`;
+    } else if (!game.isInProgress()) {
+      status = "It's a tie!";
+    }
+
+    root.querySelector(".headerStatus").textContent = status;
+  };
+
+  const updateBoard = (game) => {
+    for (let i = 0; i < game.board.length; i++) {
+      const tile = root.querySelector(`.boardTile[data-index="${i}"]`);
+      tile.textContent = game.board[i];
+    }
+  };
+
+  const update = (game) => {
+    updateTurn(game);
+    updateStatus(game);
+    updateBoard(game);
+  };
+
+  return { update, onTileClick, onRestartClick };
+})(document.querySelector("#app"));
+
+let game = gameFactory();
+gameView.update(game);
